@@ -1,0 +1,166 @@
+---
+title: "Examine SVS Regions"
+author: "Brian S Yandell"
+date: "June 9, 2016"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Convert SVS CSV file to 3 RDS files.
+
+```{r message=FALSE}
+rawpath <- "."
+library(dplyr)
+```
+
+### Read in SVS info from 28strains GZ file
+
+Source: ftp://ftp-mouse.sanger.ac.uk/current_svs/28strains.REL-1410-SV.sdp.tab.gz
+
+```{r}
+chr <- c(1:19, "X")
+cc_founders <- c("A/J", "C57BL/6J", "129S1/SvImJ", "NOD/ShiLtJ", "NZO/HlLtJ",
+                 "CAST/EiJ", "PWK/PhJ", "WSB/EiJ")
+strains <- sub("/", "_", cc_founders[-2])
+n_strains <- length(strains)
+file <- file.path(rawpath, "28strains.REL-1410-SV.sdp.tab.gz")
+
+svs.head <- as.character(unlist(read.table(file, skip=6, comment="", nrows=1)))
+svs.head[1] <- substring(svs.head[1],2)
+svs.head[1:4] <- tolower(svs.head[1:4])
+svs <- read.table(file)
+names(svs) <- svs.head
+
+## Get CC Founders
+ccf <- c("A_J", "C57BL_6NJ", "129S1_SvImJ", "NOD_ShiLtJ", "NZO_HlLtJ", "CAST_EiJ", "PWK_PhJ", "WSB_EiJ")
+svs <- cbind(svs[,1:4], svs[,ccf])
+names(svs)[-(1:4)] <- cc_founders
+```
+
+### Routines to reorganize raw SVS data
+
+```{r}
+svs_length <- function(s) {
+  out <- rep(0, length(s))
+  indel <- (s != 0)
+  s <- strsplit(s[indel], ":|-|;") ## 1:chr, 2:3:bp, 4:type
+  bp <- sapply(s, function(x) 1+diff(as.numeric(x[2:3])))
+  out[indel] <- unlist(bp)
+  out
+}
+svs_length_start <- function(s) {
+  out <- rep(0, length(s))
+  indel <- (s != 0)
+  s <- strsplit(s[indel], ":|-|;") ## 1:chr, 2:3:bp, 4:type
+  bp <- sapply(s, function(x) paste(1+diff(as.numeric(x[2:3])),
+                                    x[2], sep="_"))
+  out[indel] <- unlist(bp)
+  out
+}
+svs_start <- function(s) {
+  out <- rep(0, length(s))
+  indel <- (s != 0)
+  s <- strsplit(s[indel], ":|-|;") ## 1:chr, 2:3:bp, 4:type
+  bp <- sapply(s, function(x) as.numeric(x[2]))
+  out[indel] <- unlist(bp)
+  out
+}
+svs_end <- function(s) {
+  out <- rep(0, length(s))
+  indel <- (s != 0)
+  s <- strsplit(s[indel], ":|-|;") ## 1:chr, 2:3:bp, 4:type
+  bp <- sapply(s, function(x) as.numeric(x[3]))
+  out[indel] <- unlist(bp)
+  out
+}
+svs_type <- function(s) {
+  indel <- (s != 0)
+  s <- strsplit(s[indel], ":|-|;") ## 1:chr, 2:3:bp, 4:type
+  paste(unique(sapply(s, function(x) x[4])), collapse=",")
+}
+```
+
+### Condense full data
+
+#### First find start and end for 8 CCFs for each SVS
+
+Reduce down to SVS with something going on.
+
+```{r}
+svs_cc_type <- apply(svs[,-(1:4)], 1, svs_type)
+svs <- svs[svs_cc_type != "",]
+svs_cc_type <- svs_cc_type[svs_cc_type != ""]
+```
+
+Identify start and end for each CCF and SVS
+
+```{r}
+svs_cc_start <- apply(svs[,-(1:4)], 2, svs_start)
+svs_cc_end <- apply(svs[,-(1:4)], 2, svs_end)
+```
+
+Some really big intervals
+
+```{r}
+tmp <- apply(svs_cc_start, 1, function(x) min(x[x>0]))
+summary(tmp-svs$start)
+```
+
+```{r}
+svs[which((tmp-svs$start)>30000),]
+apply(svs[which((tmp-svs$start)>30000),2:3],1,diff)
+```
+
+Construct desired data frame.
+
+```{r}
+svs8 <- svs[,1:3]
+svs8$start <- apply(svs_cc_start, 1, function(x) min(x[x>0]))
+svs8$end <- apply(svs_cc_end, 1, max)
+svs8$type <- svs_cc_type
+```
+
+Some `end` values are beyond `B6` interval. Look at them.
+It seems to make sense to use the CCF ends
+
+```{r}
+data.frame(svs[,1:3],svs_cc_end)[which((svs$end-svs8$end) < 0),]
+```
+
+Arrange SVS types by maximum length.
+
+```{r}
+svs8 %>%
+  group_by(type) %>%
+  summarize(count=n(),
+            min_len=min(end-start),
+            max_len=max(end-start)) %>%
+  arrange(desc(max_len))
+```
+
+Arrange SVS types by number of each type.
+
+```{r}
+svs8 %>%
+  group_by(type) %>%
+  summarize(count=n(),
+            min_len=min(end-start),
+            max_len=max(end-start)) %>%
+  arrange(desc(count))
+```
+
+Now make three data frames to save
+
+```{r}
+svs8_start <- cbind(svs8, svs_cc_start)
+svs8_end <- cbind(svs8, svs_cc_end)
+svs_cc_diff <- svs_cc_end - svs_cc_start + 1
+svs_cc_diff[svs_cc_diff == 1] <- 0
+svs8_len <- cbind(svs8, svs_cc_diff)
+saveRDS(svs8_start,file=file.path(datapath,"svs8_start.rds"))
+saveRDS(svs8_end,file=file.path(datapath,"svs8_end.rds"))
+saveRDS(svs8_len,file=file.path(datapath,"svs8_len.rds"))
+```

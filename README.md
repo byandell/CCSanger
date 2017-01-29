@@ -8,12 +8,12 @@ output: html_document
 These files are getting features for use with `DOQTL` data. These are derived from
 code developed by Karl Broman.
 
-* `get_mgi_features.R`: get MGI features (genes, exons, ...) for Sanger file
-* `vcf_snp_2db.R`: (re)create `cc_foundersnps.sqlite` (update of Karl Broman's `R/0_vcf2db.R`)
-* `vcf_indel_2db.R`: create `cc_founderindels.sqlite` (new)
-* `svs.Rmd`: create `svs8_*.rds` files (new)
+* `R/get_mgi_features.R`: get MGI features (genes, exons, ...) for Sanger file
+* `inst/CreatSQL/vcf_snp_2db.R`: (re)create `cc_foundersnps.sqlite` (update of Karl Broman's `R/0_vcf2db.R`)
+* `inst/CreatSQL/vcf_indel_2db.R`: create `cc_founderindels.sqlite` (new)
+* `inst/CreatSQL/svs.Rmd`: create `svs8_*.rds` files (new)
 
-The `vcf` and svs files have hard-wired `dirpath` that needs to be locally edited.
+The `vcf` and `svs` files have hard-wired `dirpath` that needs to be locally edited.
 
 ### Required packages
 
