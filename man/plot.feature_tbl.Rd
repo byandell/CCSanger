@@ -43,10 +43,6 @@ Plot genes as rectangles followed by names.
 Stagger genes for easy reading.
 Written original by Dan Gatti 2013-02-13
 }
-\examples{
-dontrun(plot(get_mgi_features(9, 104, 109)))
-
-}
 \references{
 \url{https://github.com/dmgatti/DOQTL/blob/master/R/gene.plot.R}
 }

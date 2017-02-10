@@ -2,7 +2,7 @@
 #'
 #' Match up exon start,stop,strand with genes.
 #'
-#' @param top_snps_tbl tbl from \code{\link{get_top_snps}} or \code{\link[qtl2scan]{top_snps}}
+#' @param top_snps_tbl tbl from \code{\link[qtl2pattern]{top_snps_all}} or \code{\link[qtl2scan]{top_snps}}
 #' @param sql_filename path to \code{\link{get_mgi_features}}
 #'
 #' @return tbl of exon and gene features

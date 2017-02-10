@@ -24,7 +24,7 @@ get_gene_exon(feature_tbl, gene_snp)
 plot_gene_exon(gene_exon_tbl, top_snps_tbl, gene_name, pheno)
 }
 \arguments{
-\item{top_snps_tbl}{tbl from \code{\link{get_top_snps}} or \code{\link[qtl2scan]{top_snps}}}
+\item{top_snps_tbl}{tbl from \code{\link[qtl2pattern]{top_snps_all}} or \code{\link[qtl2scan]{top_snps}}}
 
 \item{sql_filename}{path to \code{\link{get_mgi_features}}}
 

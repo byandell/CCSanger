@@ -24,14 +24,12 @@
 #' @references \url{https://github.com/dmgatti/DOQTL/blob/master/R/gene.plot.R}
 #' @keywords hplot
 #'
-#' @examples
-#' dontrun(plot(get_mgi_features(9, 104, 109)))
-#'
 #' @method plot feature_tbl
 #' @export
 #' @importFrom ggplot2 aes element_blank geom_rect geom_text geom_vline
 #' ggplot scale_color_gradient theme xlab ylab
 #' @importFrom dplyr arrange filter
+#' 
 plot.feature_tbl <- function(x,
                       rect_col = "grey70",
                       strand_col = c("-"="#1b9e77", "+"="#d95f02"),
