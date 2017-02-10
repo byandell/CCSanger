@@ -30,4 +30,3 @@ Get subset of MGI gene table from SQLite using chromosome interval.
 dontrun(get_mgi_features(9, 104*1e6, 109*1e6))
 
 }
-

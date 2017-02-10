@@ -19,4 +19,3 @@ none
 \description{
 Simple checks.
 }
-

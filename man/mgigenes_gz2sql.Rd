@@ -29,4 +29,3 @@ Storing in SQLite, file is 1.5Mb.
 dontrun(mgigenes_gz2sql("mgi_gene"))
 
 }
-
