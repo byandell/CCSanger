@@ -8,8 +8,8 @@ Maintainer: Brian S. Yandell <byandell@wisc.edu>
 Description: Utilities to get data and create SQL or RDS databases for use with Collaborative Cross and Diversity Outbred data analysis.
 License: GPL-3
 LazyData: TRUE
-Includes:
-    doqtl2,readr,ggplot2
+Imports:
+    readr,ggplot2,dplyr
 Suggests:
     VariantAnnotation,RSQLite
 RoxygenNote: 6.0.1

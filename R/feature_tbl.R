@@ -31,6 +31,7 @@
 #' @export
 #' @importFrom ggplot2 aes element_blank geom_rect geom_text geom_vline
 #' ggplot scale_color_gradient theme xlab ylab
+#' @importFrom dplyr arrange filter
 plot.feature_tbl <- function(x,
                       rect_col = "grey70",
                       strand_col = c("-"="#1b9e77", "+"="#d95f02"),
@@ -51,7 +52,7 @@ plot.feature_tbl <- function(x,
 
   x$start <- convert_bp(x$start)
   x$stop <- convert_bp(x$stop)
-  x <- x %>% arrange(desc(type),strand,start)
+  x <- dplyr::arrange(x, desc(type),strand,start)
 
   # Expand rect_col and text_col; add Name.
   if(is.null(rect_col))
@@ -79,8 +80,7 @@ plot.feature_tbl <- function(x,
   if(is.null(xlim))
     xlim <- c(min(x$start), max(x$stop))
   else {
-    x <- x %>%
-      filter(stop >= xlim[1] & start <= xlim[2])
+    x <- dplyr::filter(x, stop >= xlim[1] & start <= xlim[2])
     # If we have no genes to plot, just return.
     if(nrow(x) == 0) {
       warning("no genes in interval")

@@ -53,7 +53,6 @@ get_snpinfo <- function(chr_id, peak_Mbp, window_Mbp,
 #' @rdname snpinfo
 #' @export
 #' @importFrom dplyr arrange desc group_by mutate summarize ungroup
-#' @importFrom qtl2pattern sdp_to_pattern
 summary.snpinfo <- function(object, ...) {
   dplyr::arrange(
     dplyr::mutate(
@@ -63,7 +62,7 @@ summary.snpinfo <- function(object, ...) {
           pct = round(100 * n() / nrow(snpinfo), 2),
           min_Mbp = min(pos_Mbp),
           max_Mbp = max(pos_Mbp))),
-      pattern = qtl2pattern::sdp_to_pattern(sdp)),
+      pattern = sdp_to_pattern(sdp)),
     dplyr::desc(pct))
 }
 

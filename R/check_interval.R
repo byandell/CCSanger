@@ -23,6 +23,8 @@ check_interval <- function(chr, start_bp, end_bp) {
 #' @param to_bp convert to bp if TRUE, Mbp if FALSE (default TRUE)
 #'
 #' @return value in bp
+#' @export
+#' 
 convert_bp <- function(value, to_bp=TRUE) {
   if(max(value) < 200 & to_bp)
     value <- value * 1e6

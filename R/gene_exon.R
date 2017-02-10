@@ -15,7 +15,7 @@
 #'
 #' @export
 #' @rdname gene_exon
-#' @importFrom dplyr arrange desc distinct select
+#' @importFrom dplyr arrange desc distinct mutate select
 get_gene_exon_snp <- function(top_snps_tbl, sql_filename) {
   ## Only need distinct snp_id.
   top_snps_tbl <- dplyr::arrange(
@@ -37,10 +37,11 @@ get_gene_exon_snp <- function(top_snps_tbl, sql_filename) {
                                   range_Mbp[1], range_Mbp[2],
                                   with_name = FALSE,
                                   sql_file = sql_filename)
-  gene_snp <- get_gene_snp(top_snps_tbl %>%
-                             mutate(pos = pos_Mbp) %>%
-                             select(snp_id,pos,lod),
-                           feature_tbl)
+  gene_snp <- get_gene_snp(
+    dplyr::select(
+      dplyr::mutate(top_snps_tbl, pos = pos_Mbp), 
+      snp_id,pos,lod),
+    feature_tbl)
   get_gene_exon(feature_tbl, gene_snp)
 }
 
