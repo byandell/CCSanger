@@ -43,7 +43,9 @@ get_svs8 <- function(chr_id, peak_Mbp, window_Mbp, datapath) {
   tmp2 <- 2^(0:7)
   svs8_len$sdp <- apply(svs8_len[,cc_founders], 1,
         function(x) sum(tmp2*(x>0)))
-  svs8_len <- dplyr::select(svs8_len, snp_id, chr, pos_Mbp, alleles, sdp, type)
+  svs8_len <- dplyr::select(
+    dplyr::rename(svs8_len, svs_type = type),
+    snp_id, chr, pos_Mbp, alleles, sdp, svs_type)
   class(svs8_len) <- c("snpinfo", class(svs8_len))
   svs8_len
 }

@@ -105,11 +105,11 @@ get_snpprobs <- function(chr_id=NULL, peak_Mbp=NULL, window_Mbp=NULL,
   }
   snpinfo <- dplyr::mutate(
     get_snpinfo(chr_id, peak_Mbp, window_Mbp, datapath),
-    type = "SNP")
+    svs_type = "SNP")
   indelinfo <- dplyr::select(
     dplyr::mutate(
       get_snpinfo(chr_id, peak_Mbp, window_Mbp, datapath, info_type = "indels"),
-      type = "Indel"),
+      svs_type = "Indel"),
     -allele)
   svsinfo <- get_svs8(chr_id, peak_Mbp, window_Mbp, datapath)
   snpinfo <- dplyr::bind_rows(snpinfo, indelinfo, svsinfo)
@@ -117,6 +117,6 @@ get_snpprobs <- function(chr_id=NULL, peak_Mbp=NULL, window_Mbp=NULL,
   snpinfo <- dplyr::mutate(snpinfo,
                            pos = pos_Mbp,
                            snp = snp_id,
-                           type = factor(type))
+                           svs_type = factor(svs_type))
   qtl2scan::genoprob_to_snpprob(probs_obj, as.data.frame(snpinfo))
 }
