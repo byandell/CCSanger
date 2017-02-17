@@ -9,7 +9,7 @@ Description: Utilities to get data and create SQL or RDS databases for use with 
 License: GPL-3
 LazyData: TRUE
 Imports:
-    readr,ggplot2,dplyr,qtl2scan
+    readr,ggplot2,dplyr
 Suggests:
-    VariantAnnotation,RSQLite
+    VariantAnnotation,RSQLite,qtl2scan
 RoxygenNote: 6.0.1
