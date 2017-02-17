@@ -2,7 +2,7 @@
 #'
 #' Match up exon start,stop,strand with genes.
 #'
-#' @param top_snps_tbl tbl from \code{\link[qtl2pattern]{top_snps_all}} or \code{\link[qtl2scan]{top_snps}}
+#' @param top_snps_tbl table from \code{\link[qtl2scan]{top_snps}}
 #' @param sql_filename path to \code{\link{get_mgi_features}}
 #'
 #' @return tbl of exon and gene features
@@ -95,7 +95,7 @@ get_gene_exon <- function(feature_tbl, gene_snp) {
 #' Uses \code{\link{gene_plot}} to plot genes, exons, mRNA with SNPs.
 #'
 #' @param exon_tbl tbl of feature information from \code{\link{get_mgi_features}}
-#' @param top_snps_tbl tbl of SNP data from \code{\link[qtl2scan]{top_snps}}
+#' @param top_snps_tbl table from \code{\link[qtl2scan]{top_snps}}
 #' @param plot_now plot now if TRUE
 #' @param ... arguments passed along to \code{\link{gene_plot}}
 #'
