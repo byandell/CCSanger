@@ -9,7 +9,7 @@
 #' @return tbl of features covering SNPs
 #'
 #' @author Brian S Yandell, \email{brian.yandell@@wisc.edu}
-#' @keywords hplot
+#' @keywords utilities
 #'
 #' @examples
 #' \dontrun{get_feature_snp(snp_tbl, feature_tbl)}
@@ -56,32 +56,6 @@ get_feature_snp <- function(snp_tbl, feature_tbl, extend=5000) {
   class(out) <- c("feature_snp", class(out))
   out
 }
-#' Plot of features with SNPs
-#'
-#' Uses \code{\link{gene_plot}} to plot genes, exons, mRNA with SNPs.
-#'
-#' @param x tbl of feature information from \code{\link{get_mgi_features}}
-#' @param ... arguments passed along to \code{\link{gene_plot}}
-#'
-#' @return ggplot (see \code{\link{gene_plot}})
-#'
-#' @author Brian S Yandell, \email{brian.yandell@@wisc.edu}
-#' @keywords hplot
-#'
-#' @method plot feature_snp
-#' @rdname feature_snp
-#' @export
-#' @importFrom dplyr distinct
-#' 
-plot.feature_snp <- function(x, ...) {
-  x$Name[is.na(x$Name)] <- x$type[is.na(x$Name)]
-  ## Plot features along with SNPs.
-  plot.feature_tbl(
-    dplyr::distinct(x, 
-                    start, stop, strand, type, .keep_all=TRUE),
-    ...)
-}
-
 
 #' Summary of features with SNP information
 #'

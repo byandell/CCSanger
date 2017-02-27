@@ -27,4 +27,4 @@ Find features that overlap with SNPs
 \author{
 Brian S Yandell, \email{brian.yandell@wisc.edu}
 }
-\keyword{hplot}
+\keyword{utilities}

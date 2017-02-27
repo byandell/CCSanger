@@ -9,7 +9,7 @@
 #' @return tbl of genes covering SNPs
 #'
 #' @author Brian S Yandell, \email{brian.yandell@@wisc.edu}
-#' @keywords hplot
+#' @keywords utilities
 #'
 #' @examples
 #' \dontrun{get_gene_snp(snp_tbl, feature_tbl)}
