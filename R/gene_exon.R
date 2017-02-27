@@ -65,8 +65,13 @@ get_gene_exon_snp <- function(top_snps_tbl, sql_filename) {
 #' @importFrom dplyr bind_rows distinct filter
 get_gene_exon <- function(feature_tbl, gene_snp) {
   exons <- list()
+  
   ## Need to get unique genes -- duplication with SNPs.
   gene_snp <- dplyr::distinct(gene_snp, gene, .keep_all=TRUE)
+  
+  if(!nrow(gene_snp)) {
+    return(NULL)
+  }
 
   ## Use gene name as Name from feature_tbl.
   for(exoni in seq_len(nrow(gene_snp))) {

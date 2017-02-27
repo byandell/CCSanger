@@ -19,6 +19,9 @@
 get_gene_snp <- function(snp_tbl, feature_tbl,
                          feature_snp =
                            get_feature_snp(snp_tbl, feature_tbl, 0)) {
+  if(!nrow(feature_snp))
+    return(NULL)
+  
   out <- dplyr::mutate(
     dplyr::select(
       dplyr::mutate(

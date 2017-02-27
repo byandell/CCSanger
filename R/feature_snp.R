@@ -23,6 +23,8 @@ get_feature_snp <- function(snp_tbl, feature_tbl, extend=5000) {
 
   feature_tbl <- dplyr::filter(feature_tbl, 
                                type %in% c("exon","gene","pseudogene","pseudogenic_exon"))
+  if(!nrow(feature_tbl))
+    return(NULL)
 
   ## Pull features that overlap with SNPs.
   ## Group features by Dbxref for each gene and get bp range.
@@ -31,6 +33,8 @@ get_feature_snp <- function(snp_tbl, feature_tbl, extend=5000) {
       dplyr::group_by(feature_tbl, Dbxref), 
       min_bp = min(start) - extend,
       max_bp = max(stop) + extend))
+  if(!nrow(genes))
+    return(NULL)
   
   ## For each gene, get rows of snp_tbl in bp range.
   tmpfn <- function(x,snp_tbl) {
