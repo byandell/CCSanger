@@ -32,7 +32,7 @@ get_gene_exon_snp <- function(top_snps_tbl, sql_filename) {
   chr_id <- as.character(unique(top_snps_tbl$chr))
   if(length(chr_id) != 1)
     stop("need exactly 1 chromosome in top_snps_tbl")
-  range_Mbp <- range(top_snps_tbl$pos_Mbp)
+  range_Mbp <- range(top_snps_tbl$pos_Mbp) + c(-1,1) * convert_bp(50000, FALSE)
   feature_tbl <- get_mgi_features(chr_id,
                                   range_Mbp[1], range_Mbp[2],
                                   with_name = FALSE,
@@ -64,7 +64,9 @@ get_gene_exon_snp <- function(top_snps_tbl, sql_filename) {
 #' @rdname gene_exon
 #' @importFrom dplyr bind_rows distinct filter
 get_gene_exon <- function(feature_tbl, gene_snp) {
-  exons <- list()
+  
+  if(is.null(gene_snp))
+    return(NULL)
   
   ## Need to get unique genes -- duplication with SNPs.
   gene_snp <- dplyr::distinct(gene_snp, gene, .keep_all=TRUE)
@@ -74,6 +76,7 @@ get_gene_exon <- function(feature_tbl, gene_snp) {
   }
 
   ## Use gene name as Name from feature_tbl.
+  exons <- list()
   for(exoni in seq_len(nrow(gene_snp))) {
     genei <- gene_snp$gene[exoni]
     ## get genei and exons spanning genei
