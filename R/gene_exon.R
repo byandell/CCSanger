@@ -152,7 +152,7 @@ summary.gene_exon <- function(gene_exon, gene_name=NULL,
       ## Goal: add columns to out for each pheno in top_snps_tbl.
       ## Column should have number of SNPs within extra_bp of gene.
       top_snps_tbl <- dplyr::select(top_snps_tbl, pheno, pos_Mbp, lod)
-      pheno_names <- sort(unique(top_snps_tbl$phen))
+      pheno_names <- sort(unique(top_snps_tbl$pheno))
       outlim <- out[,c("min_Mbp","max_Mbp")]
       extra_bp <- convert_bp(extra_bp, FALSE)
       outlim[,1] <- outlim[,1] - extra_bp
