@@ -49,3 +49,18 @@ The InDel SQLite code is a minor change to get indels. Note that there is a colu
 
 The structural variants were small, but unclear what users might want. I mainly use the `svs8_len.rds` file.
 These are in a different format from VCF. Look carefully at this. Not totally happy, but it works.
+
+
+### Installation
+
+You can install `R/CCSanger` from [GitHub](https://github.com/rqtl).
+
+You will need the following packages for `CCSanger`:
+
+    install.packages(c("assertthat", "dplyr", "feather", "dbplyr"))
+
+Once you have installed these, install `CCSanger` as
+
+    install_github("byandell/CCSanger")
+
+---
