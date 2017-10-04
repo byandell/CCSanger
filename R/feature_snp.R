@@ -28,11 +28,14 @@ get_feature_snp <- function(snp_tbl, feature_tbl, extend=5000) {
 
   ## Pull features that overlap with SNPs.
   ## Group features by Dbxref for each gene and get bp range.
-  genes <- dplyr::ungroup(
-    dplyr::summarize(
-      dplyr::group_by(feature_tbl, Dbxref), 
-      min_bp = min(start) - extend,
-      max_bp = max(stop) + extend))
+  genes <- dplyr::mutate(
+    dplyr::ungroup(
+      dplyr::summarize(
+        dplyr::group_by(feature_tbl, Dbxref), 
+        min_bp = min(start) - extend,
+        max_bp = max(stop) + extend)),
+    # Catch any missing values for Dbxref
+    Dbxref = ifelse(is.na(Dbxref), "NA", Dbxref))
   if(!nrow(genes))
     return(NULL)
   
