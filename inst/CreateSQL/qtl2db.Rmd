@@ -1,0 +1,414 @@
+---
+title: "Qtl2db"
+author: "Brian S. Yandell"
+date: "11/13/2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Setup
+
+```{r}
+v1path <- "~/Documents/Research/attie_alan/DO/data/DerivedData"
+v2path <- "~/Documents/Research/attie_alan/DO/AttieDOv2"
+```
+
+```{r message=FALSE}
+library(tidyverse)
+library(qtl2db)
+library(CCSanger)
+```
+
+```{r}
+query_mgi <- create_gene_query_func(file.path(v2path, "qtl2db", "mouse_genes_mgi.sqlite"))
+query_genes <- create_gene_query_func(file.path(v2path, "qtl2db", "mouse_genes.sqlite"))
+query_variants <- create_variant_query_func(file.path(v2path, "qtl2db", "cc_variants.sqlite"))
+```
+
+#### Examining environments
+
+The `query_func` routines embed the `dbfile` name in the environment of the created function. Cool, as then no longer need to pass the directory as argument.
+
+```{r}
+ls(environment(query_mgi))
+ls.str(environment(query_mgi))
+```
+
+```{r}
+chr_id <- "1"
+peak_Mbp <- 34.5
+window_Mbp <- 0.5
+```
+
+### Examine Variants
+
+First look at new variants. As we shall see, these differ because the data have 
+been updated and because Karl made some different design choices in `qtl2db`. 
+
+```{r}
+svNewAll <- query_variants(chr_id, 
+                      peak_Mbp - window_Mbp, 
+                      peak_Mbp + window_Mbp)
+```
+
+Look at a few key columns.
+
+```{r}
+svNewAll %>%
+  select(snp_id, chr, pos, sdp, consequence, type) %>%
+  head
+```
+
+How many times did each founder get different SNP group score?
+
+```{r}
+svNewAll %>%
+  select(A_J:WSB_EiJ) %>%
+  gather(strain, group) %>%
+  count(strain, group) %>%
+  spread(group, n, fill = 0)
+```
+
+How many times was each group number assigned. Group 1 should be most of the time,
+for the most frequent allele. Counts are across the columns.
+
+```{r}
+svNewAll %>%
+  select(snp_id, A_J:WSB_EiJ) %>%
+  gather(strain, group, -snp_id) %>%
+  count(snp_id, group) %>%
+  count(group, n) %>%
+  spread(n, nn, fill = 0)
+```
+
+What about those markers with seven groups?
+
+```{r}
+svNewAll %>%
+  select(snp_id, A_J:WSB_EiJ) %>%
+  gather(strain, group, -snp_id) %>%
+  count(snp_id, group) %>%
+  spread(group, n) %>%
+  rename(seven = "7") %>%
+  filter(seven > 0)
+```
+
+#### Quick look at alleles
+
+```{r}
+svNewAll %>%
+  filter(type == "indel") %>%
+  select(alleles) %>%
+  head
+```
+
+```{r}
+svNewAll %>%
+  filter(type == "SV") %>%
+  select(alleles) %>%
+  head
+```
+
+```{r}
+svNewAll %>%
+  filter(type == "SV") %>%
+  select(alleles) %>%
+  mutate(alleles = str_replace(alleles, ".*[0-9];([A-Z]+)[;|].*", '\\1')) %>%
+  table
+```
+
+## Compare old to new
+
+Old variants now have similar `query_func` in `CCSanger` (for now).
+
+```{r}
+query_variants_cc <- create_variant_query_func_cc(v1path)
+```
+
+```{r}
+svOld <- query_variants_cc(chr_id, 
+                      peak_Mbp - window_Mbp, 
+                      peak_Mbp + window_Mbp)
+```
+
+These will differ in a variety of ways, most importantly that the map and markers have moved somewhat. Other changes have to do with style choices or other aspects we want to sort out. We begin limiting to columns shared between old and new.
+
+```{r}
+svNew <- svNewAll[,c(1:7,16)]
+```
+
+```{r}
+all.equal(svNew, svOld)
+```
+
+#### Match up snp IDs
+
+Need to take care of SVs that have changed position or length. First match up names that agree.
+
+```{r}
+tmpfn <- function(x) {
+  str_replace(x, "_[0-9]*$", "")
+}
+m <- match(tmpfn(svNew$snp_id), tmpfn(svOld$snp_id), nomatch = 0)
+cbind(svNew$snp_id[m == 0], svOld$snp_id[-m[m>0]])
+```
+
+Several of those remaining have same start position.
+```{r}
+tmpfn2 <- function(x) {
+  as.numeric(str_replace(x, "SV_1_([0-9]*)_[0-9]*$", "\\1"))
+}
+tmpfn2(svNew$snp_id[m == 0]) - tmpfn2(svOld$snp_id[-m[m>0]])
+```
+
+Assume rest have shifted start but are basically the same, barring a closer look at alleles.
+
+```{r}
+m[m == 0] <- seq_len(nrow(svOld))[-m[m>0]]
+```
+
+```{r}
+all.equal(svNew, svOld[m,])
+```
+
+#### Need to flip sdp when B6 is minority
+
+Karl changed from always setting B6 to 0 to setting the most common allele to 0.
+This means we need to flip B6 if rare, or change code. For now we flip just to
+align two sets. 
+
+First we look at plot to notice the flip.
+
+```{r}
+dat <- data.frame(sdp1 = as.numeric(svNew$sdp), 
+                  svOld[m,]) %>%
+  mutate(type = ifelse(type %in% c("snp","indel"), type, "SV"))
+```
+
+```{r}
+ggplot(dat) + 
+  aes(x=sdp1,y= sdp1 - sdp,col=type) +
+  geom_abline(slope = c(0,2), intercept = c(0,-255)) +
+  geom_point(alpha=0.2)
+```
+
+Examine those that are not equal.
+
+```{r}
+dat %>% 
+  filter(sdp1 != sdp) %>%
+  count(sdp1, sdp,) %>%
+  arrange(desc(n))
+```
+
+Look only at those that are perfect flips. All have B6 `TRUE` in `sdp` but
+this is the minor allele.
+
+```{r}
+dat %>% 
+  filter(sdp1 == 255 - sdp) %>%
+  count(sdp1, sdp) %>%
+  mutate(B6 = sdp_to_logical(sdp1)[2],
+         count = apply(sdp_to_logical(sdp1), 2, sum),
+         pattern = sdp_to_pattern(sdp1))
+```
+
+The next set is more complicated. Sometimes B6 is not the minor allele. It may be that there were more than two alleles?
+
+```{r}
+dat %>% 
+  filter(sdp1 != sdp,
+         sdp1 != 255 - sdp) %>%
+  count(sdp1, sdp) %>%
+  mutate(B6 = sdp_to_logical(sdp1)[2],
+         count = apply(sdp_to_logical(sdp1), 2, sum),
+         pattern = sdp_to_pattern(sdp1))
+```
+
+```{r}
+sdp_off <- (dat$sdp1 != dat$sdp)
+sdp_off <- sdp_off + (sdp_off & (dat$sdp1 != 255 - dat$sdp))
+table(sdp_off)
+```
+
+Now compare if we just switch B6 to always be 0.
+
+```{r}
+tmpfn <- function(x) {
+  lx <- sdp_to_logical(x)[2,]
+  ifelse(lx, 253 - x, x)
+}
+all.equal(svNew %>%
+            mutate(sdp = tmpfn(sdp)),
+          svOld[m,])
+```
+
+Look at plot to verify what is left
+```{r}
+tmp3 <- sdp_to_logical(svNew$sdp)[2,]
+tmp3 <- ifelse(tmp3, 253 - svNew$sdp, svNew$sdp)
+dat <- data.frame(
+  sdp1 = as.numeric(tmp3), 
+  svOld[m,]) %>%
+  mutate(type = ifelse(type %in% c("snp","indel"), type, "SV"))
+```
+
+```{r}
+ggplot(dat) + 
+  aes(x=sdp1,y= sdp1 - sdp,col=type) +
+  geom_abline(slope = c(0,2), intercept = c(0,-255)) +
+  geom_point(alpha=0.2)
+```
+
+#### Reexamine founder alleles
+
+The first set have B6 in the majority (`group` 1). As can be seen, many but not all are biallelic.
+
+```{r}
+svNewAll %>%
+  filter(sdp_off == 0) %>%
+  select(snp_id, A_J:WSB_EiJ) %>%
+  gather(strain, group, -snp_id) %>%
+  count(snp_id, group) %>%
+  count(group, n) %>%
+  spread(n, nn, fill = 0)
+```
+
+The second set have B6 flipped in the new database and the `sdp` is flipped as well (`sdpNew = 255 - sdpOld`). As can be seen, these all are biallelic.
+
+```{r}
+svNewAll %>%
+  filter(sdp_off == 1) %>%
+  select(snp_id, A_J:WSB_EiJ) %>%
+  gather(strain, group, -snp_id) %>%
+  count(snp_id, group) %>%
+  count(group, n) %>%
+  spread(n, nn, fill = 0)
+```
+
+The third set have B6 flipped but the `sdp` values differ. There are not many of these, and of the `r sum(sdp_off == 2)` are biallelic
+
+```{r}
+svNewAll %>%
+  filter(sdp_off == 2) %>%
+  select(snp_id, A_J:WSB_EiJ) %>%
+  gather(strain, group, -snp_id) %>%
+  count(snp_id, group) %>%
+  count(group, n) %>%
+  spread(n, nn, fill = 0)
+```
+
+```{r}
+svNewAll %>%
+  filter(sdp_off == 2) %>%
+  select(A_J:WSB_EiJ) ->
+  tmp
+names(tmp) <- LETTERS[1:8]
+tmp %>%
+  count(A,B,C,D,E,F,G,H) %>%
+  arrange(desc(n),A,B,C,D,E,F,G,H)
+```
+
+#### compare alleles field
+
+Sometimes the difference is that alleles are reversed, or there are more options.
+For `SV`, the recording of alleles is different, so basically not comparable.
+
+```{r}
+svAlleles <- bind_cols(
+  svNew %>%
+    mutate(sdp = tmpfn(sdp)) %>%
+    select(type, alleles) %>%
+    rename(allelesNew = alleles),
+  svOld[m,] %>%
+    select(alleles) %>%
+    rename(allelesOld = alleles))
+svAlleles %>%
+  group_by(type) %>%
+  summarize(same = sum(allelesNew == allelesOld),
+            diff = sum(allelesNew != allelesOld))
+```
+
+For SNPs, they basically agree. Some basepair gymnastics help show that.
+
+```{r}
+dropAlleles <- function(alleles) {
+  apply(str_split_fixed(alleles, "\\/", 2), 1,
+        function(x) x[1])
+}
+flipAlleles <- function(alleles) {
+  apply(str_split_fixed(alleles, "\\|", 2), 1,
+        function(x) paste(x[2], x[1], sep = "|"))
+}
+sortAlleles <- function(alleles) {
+  sapply(str_split(alleles, "\\||\\/", simplify = FALSE),
+        function(x) paste(sort(x), collapse = "|"))
+}
+bpAlleles <- function(alleles) {
+  sapply(
+    str_extract_all(alleles, paste(LETTERS, collapse = "|")),
+    function(x) paste(sort(x), collapse = ""))
+}
+svAlleles %>%
+  filter(allelesNew != allelesOld,
+         type == "snp") %>%
+  mutate(allelesNewS = sortAlleles(allelesNew),
+         allelesOldS = sortAlleles(allelesOld)) %>%
+  filter(allelesNew != allelesOld,
+         type == "snp") %>%
+  mutate(allelesFlip = flipAlleles(allelesOld),
+         allelesDrop = dropAlleles(allelesOld),
+         allelesFlipDrop = flipAlleles(allelesDrop)) %>%
+  filter((allelesNew != allelesFlip) & 
+           (allelesNew != allelesDrop) & 
+           (allelesNew != allelesFlipDrop) &
+           (allelesNewS != allelesOldS))
+```
+
+Indels also basically agree, with some minor changes.
+
+```{r}
+svAlleles %>%
+  filter(allelesNew != allelesOld,
+         type == "indel") %>%
+  mutate(allelesNewS = sortAlleles(allelesNew),
+         allelesOldS = sortAlleles(allelesOld)) %>%
+  filter(allelesNewS != allelesOldS) %>%
+  mutate(allelesNew = abbreviate(allelesNew, 40),
+         allelesOld = abbreviate(allelesOld, 40)) %>%
+  select(allelesNew, allelesOld)
+```
+
+## Examine MGI Genes
+
+```{r}
+geneNew <- query_mgi(chr_id, peak_Mbp - window_Mbp, peak_Mbp + window_Mbp)
+```
+
+```{r}
+query_mgi_cc <- create_gene_query_func_cc(file.path(v1path, "mgi_db.sqlite"))
+geneOld <- query_mgi_cc(chr_id, peak_Mbp - window_Mbp, peak_Mbp + window_Mbp)
+#  CCSanger::get_mgi_features("1", 34, 35, with_name = TRUE, 
+#                         sql_file = file.path(v1path, "mgi_db.sqlite"))
+```
+
+```{r}
+m <- match(geneOld$Name, geneNew$Name)
+geneOld$start - geneNew$start[m]*1e6
+```
+
+```{r}
+full_join(geneNew %>% 
+            select(Name, start, stop, strand) %>% 
+            mutate(start = start * 1e6,
+                   stop = stop * 1e6) %>%
+            distinct(Name, start, stop, strand),
+           geneOld %>% 
+             select(Name, start, stop, strand),
+           by = "Name") %>%
+  head
+```
+
