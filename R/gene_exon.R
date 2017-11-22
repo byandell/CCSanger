@@ -1,6 +1,6 @@
 #' Get exons for set of genes
 #'
-#' Match up exon start,stop,strand with genes.
+#' Match up exon start,stop,strand with genes. Use \code{query_genes} to find features; see \code{qtl2db}.
 #'
 #' @param top_snps_tbl table from \code{\link[qtl2scan]{top_snps}}
 #'
@@ -10,12 +10,12 @@
 #' @keywords utilities
 #'
 #' @examples
-#' \dontrun{get_gene_exon_snp(top_snps_tbl, sql_filename)}
+#' \dontrun{get_gene_exon_snp(top_snps_tbl)}
 #'
 #' @export
 #' @rdname gene_exon
 #' @importFrom dplyr arrange desc distinct mutate select
-get_gene_exon_snp <- function(top_snps_tbl, sql_filename) {
+get_gene_exon_snp <- function(top_snps_tbl) {
   ## Only need distinct snp_id.
   top_snps_tbl <- dplyr::arrange(
     dplyr::select(

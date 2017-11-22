@@ -4,7 +4,7 @@
 #' Stagger genes for easy reading.
 #' Written original by Dan Gatti 2013-02-13
 #'
-#' @param x tbl of gene information from \code{query_genes}; see package \code{qtl2db}
+#' @param x tbl of gene information from \code{query_variants}; see package \code{qtl2db}
 #' @param rect_col fill color of rectangle (default "grey70")
 #' @param strand_col edge color of rectangle by strand from \code{x} (default -="blue", +="red"; none if NULL)
 #' @param type_col color of type from \code{x} (default "black" for gene, "blue" for pseudogene; none if NULL)
