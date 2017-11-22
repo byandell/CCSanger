@@ -21,7 +21,7 @@ get_gene_exon_snp <- function(top_snps_tbl) {
     dplyr::select(
       dplyr::distinct(top_snps_tbl, snp_id, .keep_all=TRUE),
       -pheno),
-    pos_Mbp)
+    pos)
 
   if(is.null(top_snps_tbl))
     return(NULL)
@@ -31,11 +31,11 @@ get_gene_exon_snp <- function(top_snps_tbl) {
   chr_id <- as.character(unique(top_snps_tbl$chr))
   if(length(chr_id) != 1)
     stop("need exactly 1 chromosome in top_snps_tbl")
-  range_Mbp <- range(top_snps_tbl$pos_Mbp) + c(-1,1) * convert_bp(50000, FALSE)
+  range_Mbp <- range(top_snps_tbl$pos) + c(-1,1) * convert_bp(50000, FALSE)
   feature_tbl <- query_genes(chr_id, range_Mbp[1], range_Mbp[2])
   gene_snp <- get_gene_snp(
     dplyr::select(
-      dplyr::mutate(top_snps_tbl, pos = pos_Mbp), 
+      top_snps_tbl, 
       snp_id,pos,lod),
     feature_tbl)
   get_gene_exon(feature_tbl, gene_snp)
@@ -147,7 +147,7 @@ summary.gene_exon <- function(gene_exon, gene_name=NULL,
     if(!is.null(top_snps_tbl)) {
       ## Goal: add columns to out for each pheno in top_snps_tbl.
       ## Column should have number of SNPs within extra_bp of gene.
-      top_snps_tbl <- dplyr::select(top_snps_tbl, pheno, pos_Mbp, lod)
+      top_snps_tbl <- dplyr::select(top_snps_tbl, pheno, pos, lod)
       pheno_names <- sort(unique(top_snps_tbl$pheno))
       outlim <- out[,c("min_Mbp","max_Mbp")]
       extra_bp <- convert_bp(extra_bp, FALSE)
@@ -157,7 +157,7 @@ summary.gene_exon <- function(gene_exon, gene_name=NULL,
         out[[pheno_val]] <-
           apply(outlim, 1,
                 function(x,y) {
-                  in_region <- y$pos_Mbp >= x[1] & y$pos_Mbp <= x[2]
+                  in_region <- y$pos >= x[1] & y$pos <= x[2]
                   if(any(in_region))
                     max(y$lod[in_region])
                   else

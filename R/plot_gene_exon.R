@@ -24,7 +24,7 @@ plot_gene_exon <- function(gene_exon, top_snps_tbl=NULL, plot_now=TRUE,
   if(!is.null(top_snps_tbl)) {
     top_snps_tbl <- dplyr::ungroup(
       dplyr::summarize(
-        dplyr::group_by(top_snps_tbl, snp_id,pos_Mbp),
+        dplyr::group_by(top_snps_tbl, snp_id, pos),
         lod=max(lod)))
   }
   for(genei in genes) {
