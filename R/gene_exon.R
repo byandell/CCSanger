@@ -32,7 +32,7 @@ get_gene_exon_snp <- function(top_snps_tbl) {
   if(length(chr_id) != 1)
     stop("need exactly 1 chromosome in top_snps_tbl")
   range_Mbp <- range(top_snps_tbl$pos_Mbp) + c(-1,1) * convert_bp(50000, FALSE)
-  feature_tbl <- query_variants(chr_id, range_Mbp[1], range_Mbp[2])
+  feature_tbl <- query_genes(chr_id, range_Mbp[1], range_Mbp[2])
   gene_snp <- get_gene_snp(
     dplyr::select(
       dplyr::mutate(top_snps_tbl, pos = pos_Mbp), 
