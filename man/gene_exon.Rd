@@ -7,7 +7,7 @@
 \alias{subset.gene_exon}
 \title{Get exons for set of genes}
 \usage{
-get_gene_exon_snp(top_snps_tbl, sql_filename)
+get_gene_exon_snp(top_snps_tbl)
 
 get_gene_exon(feature_tbl, gene_snp)
 
@@ -39,14 +39,14 @@ tbl of exon and gene features
 tbl of summary
 }
 \description{
-Match up exon start,stop,strand with genes.
+Match up exon start,stop,strand with genes. Use \code{query_genes} to find features; see \code{qtl2db}.
 
 Match up exon start,stop,strand with genes.
 
 Returns table of gene and its exons.
 }
 \examples{
-\dontrun{get_gene_exon_snp(top_snps_tbl, sql_filename)}
+\dontrun{get_gene_exon_snp(top_snps_tbl)}
 
 \dontrun{get_gene_exon(feature_snp)}
 

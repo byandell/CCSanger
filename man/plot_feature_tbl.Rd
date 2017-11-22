@@ -17,7 +17,7 @@ plot_feature_tbl(x, rect_col = "grey70", strand_col = c(`-` = "#1b9e77", `+`
 \method{plot}{feature_tbl}(x, ...)
 }
 \arguments{
-\item{x}{tbl of gene information from \code{query_genes}; see package \code{qtl2db}}
+\item{x}{tbl of gene information from \code{query_variants}; see package \code{qtl2db}}
 
 \item{rect_col}{fill color of rectangle (default "grey70")}
 
