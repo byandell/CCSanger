@@ -4,7 +4,7 @@
 #' Stagger genes for easy reading.
 #' Written original by Dan Gatti 2013-02-13
 #'
-#' @param x tbl of gene information from \code{\link{get_mgi_features}}
+#' @param x tbl of gene information from \code{query_genes}; see package \code{qtl2db}
 #' @param rect_col fill color of rectangle (default "grey70")
 #' @param strand_col edge color of rectangle by strand from \code{x} (default -="blue", +="red"; none if NULL)
 #' @param type_col color of type from \code{x} (default "black" for gene, "blue" for pseudogene; none if NULL)
@@ -144,7 +144,7 @@ plot_feature_tbl <- function(x,
                              ymax = bottom - 1 + offset),
       fill = rect_col,
       color = rect_edge) +
-    ggplot2::xlab(paste("Chr", x$seqid[1], "(Mb)")) +
+    ggplot2::xlab(paste("Chr", x$chr[1], "(Mb)")) +
     ggplot2::ylab("")
   if(!is.null(snp_pos) & nrow(x) == 1) {
     ## If only one Gene, then put SNP dashes in front of rectangles to show overlap.

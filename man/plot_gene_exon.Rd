@@ -20,7 +20,7 @@ plot_gene_exon(gene_exon, top_snps_tbl = NULL, plot_now = TRUE,
 
 \item{...}{arguments passed along to \code{\link{gene_plot}}}
 
-\item{exon_tbl}{tbl of feature information from \code{\link{get_mgi_features}}}
+\item{exon_tbl}{tbl of feature information from \code{query_variants}; see package \code{qtl2db}}
 }
 \value{
 list of ggplots (see \code{\link{gene_plot}})

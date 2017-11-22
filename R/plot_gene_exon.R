@@ -2,7 +2,7 @@
 #'
 #' Uses \code{\link{gene_plot}} to plot genes, exons, mRNA with SNPs.
 #'
-#' @param exon_tbl tbl of feature information from \code{\link{get_mgi_features}}
+#' @param exon_tbl tbl of feature information from \code{query_variants}; see package \code{qtl2db}
 #' @param top_snps_tbl table from \code{\link[qtl2scan]{top_snps}}
 #' @param plot_now plot now if TRUE
 #' @param ... arguments passed along to \code{\link{gene_plot}}

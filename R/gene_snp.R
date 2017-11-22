@@ -3,7 +3,7 @@
 #' Find features that overlap with SNPs
 #'
 #' @param snp_tbl tbl of SNPs from \code{assoc.map}
-#' @param feature_tbl tbl of feature information from \code{\link{get_mgi_features}}
+#' @param feature_tbl tbl of feature information from \code{query_variants}; see package \code{qtl2db}
 #' @param feature_snp tbl of feature information from \code{\link{get_feature_snp}}
 #'
 #' @return tbl of genes covering SNPs

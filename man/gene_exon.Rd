@@ -19,9 +19,7 @@ get_gene_exon(feature_tbl, gene_snp)
 \arguments{
 \item{top_snps_tbl}{table from \code{\link[qtl2scan]{top_snps}}}
 
-\item{sql_filename}{path to \code{\link{get_mgi_features}}}
-
-\item{feature_tbl}{tbl of features from \code{\link{get_mgi_feature}}}
+\item{feature_tbl}{tbl of features from \code{query_variants}; see package \code{qtl2db}}
 
 \item{gene_snp}{tbl of genes with SNPs IDs from \code{\link{match_feature_snp}}}
 

@@ -29,7 +29,7 @@ mgigenes_gz2sql <- function(gene_tbl = "mgi_gene",
                       create = !file.exists(sql_file))
   ## Read gzipped file from MGI. Names not included.
   mgi_gene <- readr::read_tsv(gz_file, comment="#", col_names=FALSE)
-  names(mgi_gene) <- c("seqid", "source", "type", "start", "stop",
+  names(mgi_gene) <- c("chr", "source", "type", "start", "stop",
                        "score", "strand", "phase", "ID", "Name",
                        "Parent", "Dbxref", "mgiName", "bioType")
   invisible(dplyr::copy_to(my_db,
@@ -42,8 +42,9 @@ mgigenes_gz2sql <- function(gene_tbl = "mgi_gene",
 #' Pull MGI gene tbl from SQLite database
 #'
 #' Get subset of MGI gene table from SQLite using chromosome interval.
+#' This is being replaced by \code{query_variants}. See package qtl2db.
 #'
-#' @param chr chromosome number
+#' @param chr_id chromosome number
 #' @param start_bp starting position in bp
 #' @param end_bp ending position in bp
 #' @param with_name only pull named features if TRUE (default)
@@ -56,19 +57,26 @@ mgigenes_gz2sql <- function(gene_tbl = "mgi_gene",
 #' dontrun(get_mgi_features(9, 104*1e6, 109*1e6))
 #'
 #' @export
-#' @importFrom dplyr collect filter src_sqlite
-get_mgi_features <- function(chr, start_bp, end_bp,
+#' @importFrom dplyr collect filter rename src_sqlite
+#' 
+get_mgi_features <- function(chr_id, start_bp, end_bp,
                           with_name = TRUE,
                           gene_tbl = "mgi_gene",
                           sql_file = "mgi_db.sqlite") {
   check_interval(chr, start_bp, end_bp)
   start_bp <- convert_bp(start_bp)
   end_bp <- convert_bp(end_bp)
-  out <- dplyr::filter(
-    tbl(dplyr::src_sqlite(sql_file), gene_tbl),
-    seqid == chr,
-    start >= start_bp,
-    stop <= end_bp)
+  
+  # kludge for now; make sure first column has name "chr"
+  out <- tbl(dplyr::src_sqlite(sql_file), gene_tbl)
+  chk <- dplyr::collect(head(out, 1))
+  if(names(chk)[1] == "seqid")
+    out <- dplyr::rename(out, chr = seqid)
+  
+  out <- dplyr::filter(out,
+                       chr == chr_id,
+                       start >= start_bp,
+                       stop <= end_bp)
   if(with_name)
     out <- dplyr::filter(out, !is.na(Name))
 

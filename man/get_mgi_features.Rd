@@ -4,11 +4,11 @@
 \alias{get_mgi_features}
 \title{Pull MGI gene tbl from SQLite database}
 \usage{
-get_mgi_features(chr, start_bp, end_bp, with_name = TRUE,
+get_mgi_features(chr_id, start_bp, end_bp, with_name = TRUE,
   gene_tbl = "mgi_gene", sql_file = "mgi_db.sqlite")
 }
 \arguments{
-\item{chr}{chromosome number}
+\item{chr_id}{chromosome number}
 
 \item{start_bp}{starting position in bp}
 
@@ -25,6 +25,7 @@ tbl from SQLite database
 }
 \description{
 Get subset of MGI gene table from SQLite using chromosome interval.
+This is being replaced by \code{query_variants}. See package qtl2db.
 }
 \examples{
 dontrun(get_mgi_features(9, 104*1e6, 109*1e6))

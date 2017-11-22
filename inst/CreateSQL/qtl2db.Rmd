@@ -390,7 +390,12 @@ geneNew <- query_mgi(chr_id, peak_Mbp - window_Mbp, peak_Mbp + window_Mbp)
 
 ```{r}
 query_mgi_cc <- create_gene_query_func_cc(file.path(v1path, "mgi_db.sqlite"))
-geneOld <- query_mgi_cc(chr_id, peak_Mbp - window_Mbp, peak_Mbp + window_Mbp)
+geneOld <- 
+  query_mgi_cc(
+    chr_id, 
+    peak_Mbp - window_Mbp, 
+    peak_Mbp + window_Mbp) %>%
+  filter(!is.na(Name))
 #  CCSanger::get_mgi_features("1", 34, 35, with_name = TRUE, 
 #                         sql_file = file.path(v1path, "mgi_db.sqlite"))
 ```
@@ -410,5 +415,32 @@ full_join(geneNew %>%
              select(Name, start, stop, strand),
            by = "Name") %>%
   head
+```
+
+### genes, exons and other features
+
+It seems the new version has many more.
+
+```{r}
+exonNew <- query_genes(chr_id, peak_Mbp - window_Mbp, peak_Mbp + window_Mbp)
+```
+
+```{r}
+exonOld <- CCSanger::get_mgi_features(chr_id, peak_Mbp - window_Mbp, peak_Mbp + window_Mbp, with_name = FALSE,
+                               sql_file = file.path(v1path, "mgi_db.sqlite"))
+```
+
+Old gene names are subset of new gene names.
+
+```{r}
+m <- match(exonNew$Name[!is.na(exonNew$Name)],
+           exonOld$Name[!is.na(exonOld$Name)])
+c(length(m), sum(is.na(m)))
+```
+
+```{r}
+m <- match(unique(exonNew$Dbxref),
+           unique(exonOld$Dbxref))
+c(length(m), sum(is.na(m)))
 ```
 

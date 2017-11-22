@@ -3,7 +3,6 @@
 #' Match up exon start,stop,strand with genes.
 #'
 #' @param top_snps_tbl table from \code{\link[qtl2scan]{top_snps}}
-#' @param sql_filename path to \code{\link{get_mgi_features}}
 #'
 #' @return tbl of exon and gene features
 #'
@@ -33,10 +32,7 @@ get_gene_exon_snp <- function(top_snps_tbl, sql_filename) {
   if(length(chr_id) != 1)
     stop("need exactly 1 chromosome in top_snps_tbl")
   range_Mbp <- range(top_snps_tbl$pos_Mbp) + c(-1,1) * convert_bp(50000, FALSE)
-  feature_tbl <- get_mgi_features(chr_id,
-                                  range_Mbp[1], range_Mbp[2],
-                                  with_name = FALSE,
-                                  sql_file = sql_filename)
+  feature_tbl <- query_variants(chr_id, range_Mbp[1], range_Mbp[2])
   gene_snp <- get_gene_snp(
     dplyr::select(
       dplyr::mutate(top_snps_tbl, pos = pos_Mbp), 
@@ -49,7 +45,7 @@ get_gene_exon_snp <- function(top_snps_tbl, sql_filename) {
 #'
 #' Match up exon start,stop,strand with genes.
 #'
-#' @param feature_tbl tbl of features from \code{\link{get_mgi_feature}}
+#' @param feature_tbl tbl of features from \code{query_variants}; see package \code{qtl2db}
 #' @param gene_snp tbl of genes with SNPs IDs from \code{\link{match_feature_snp}}
 #'
 #' @return tbl of exon and gene features

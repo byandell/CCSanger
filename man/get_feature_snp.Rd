@@ -9,7 +9,7 @@ get_feature_snp(snp_tbl, feature_tbl, extend = 5000)
 \arguments{
 \item{snp_tbl}{tbl of SNPs from \code{assoc.map}}
 
-\item{feature_tbl}{tbl of feature information from \code{\link{get_mgi_features}}}
+\item{feature_tbl}{tbl of feature information from \code{\link[qtl2db]{create_gene_query_func}}}
 
 \item{extend}{extend region for SNPs in bp (default 5000)}
 }
