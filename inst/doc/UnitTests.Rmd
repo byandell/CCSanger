@@ -1,0 +1,42 @@
+---
+title: "Query check"
+author: "Brian S. Yandell"
+date: "11/22/2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+v2path <- "~/Documents/Research/attie_alan/DO/AttieDOv2"
+```
+
+```{r}
+query_genes <- 
+  qtl2db::create_gene_query_func(
+    file.path(v2path, "qtl2db", "mouse_genes.sqlite"))
+query_variants <- 
+  qtl2db::create_variant_query_func(
+    file.path(v2path, "qtl2db", "cc_variants.sqlite"))
+```
+
+```{r}
+chr_id <- "1"
+start <- 34
+stop <- 35
+```
+
+```{r}
+genes <- CCSanger::get_gene(chr_id, start, stop)
+```
+
+```{r}
+summary(genes)
+```
+
+```{r}
+summary(subset(genes, 34.2, 34.6))
+```
+

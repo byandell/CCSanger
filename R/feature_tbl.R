@@ -25,8 +25,8 @@ summary.feature_tbl <- function(object, major=TRUE) {
     dplyr::summarize(
       dplyr::group_by(object, type),
       count = n(),
-      min_Mbp = convert_bp(min(start), FALSE),
-      max_Mbp = convert_bp(max(stop), FALSE)))
+      min_Mbp = min(start),
+      max_Mbp = max(stop)))
 }
 #' Subset of features
 #'
@@ -45,8 +45,8 @@ summary.feature_tbl <- function(object, major=TRUE) {
 #' @importFrom dplyr filter
 subset.feature_tbl <- function(x, start_val=0, stop_val=max(x$stop), ...) {
   x <- dplyr::filter(x,
-                     start >= convert_bp(start_val),
-                     stop <= convert_bp(stop_val))
+                     start >= convert_bp(start_val, FALSE),
+                     stop <= convert_bp(stop_val, FALSE))
   class(x) <- unique(c("feature_tbl", class(x)))
   x
 }
