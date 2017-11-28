@@ -1,8 +1,8 @@
 Package: CCSanger
 Type: Package
 Title: Utilities to get and use Sanger data for Collaborative Cross
-Version: 0.1.5
-Date: 2017-11-21
+Version: 0.2.1
+Date: 2017-11-28
 Author: Brian S. Yandell
 Maintainer: Brian S. Yandell <byandell@wisc.edu>
 Description: Utilities to get data and create SQL or RDS databases for use with Collaborative Cross and Diversity Outbred data analysis.
